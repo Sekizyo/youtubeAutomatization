@@ -13,13 +13,17 @@ class databaseManager():
         print("Connection to SQLite DB successful")
 
     except Error as e:
-        print(f"The error '{e}' occurred")
+        raise
 
     return connection
 
   def closeConnection(self):
-    if self.connection:
-      self.connection.close()
+    try:
+      if self.connection:
+        self.connection.close()
+
+    except Error as e:
+      raise
 
   def createVideoTableQuery(self):
     query = f"""CREATE TABLE IF NOT EXISTS videos(
@@ -28,7 +32,7 @@ class databaseManager():
       title TEXT NOT NULL,
       description TEXT,
       uploaded BOOL NOT NULL,
-      localization TEXT NOT NULL,
+      path TEXT NOT NULL,
       soundcloudLink TEXT NOT NULL
       );
       """
@@ -47,47 +51,51 @@ class databaseManager():
     response = self.executeQuery(query)
     return response
 
-
-  def basicSelectQuery(self, data, table):
-    query = f'SElECT {data} FROM {table} WHERE 1'
+  def selectQuery(self, data, table, condition='1'):
+    query = f'SELECT {", ".join(data)} FROM {table} WHERE {condition};'
     
     response = self.executeQuery(query)
     return response
 
-  def insertIntotQuery(self, tableName, columns, values):
-    query = f'INSERT INTO {tableName}({", ".join(columns)}) VALUES ({", ".join(values)});'
+  def insertIntoQuery(self, tableName, columns, values):
+    query = f'INSERT INTO {tableName} ({", ".join(columns)}) VALUES ({", ".join(values)});'
+    
+    response = self.executeQuery(query)
+    return response
+
+  def updateRecordQuery(self, tableName, column, value, condition):
+    query = f'UPDATE {tableName} SET {column} = {value} WHERE {condition};'
+    
+    response = self.executeQuery(query)
+    return response
+
+  def updateRecordByIDQuery(self, tableName, column, value, ID):
+    response = self.updateRecordQuery(tableName, column, value, f'ID = {ID}')
+    return response 
+
+  def deleteFromTableQuery(self, tableName, condition):
+    query = f'DELETE FROM {tableName} WHERE {condition};'
     
     response = self.executeQuery(query)
     return response
 
   def dropTabletQuery(self, tableName):
-    try:
-        query = f'DROP TABLE {tableName}'
+    query = f'DROP TABLE {tableName};'
 
-        response = self.executeQuery(query)
-        return response
-
-    except:
-      raise
+    response = self.executeQuery(query)
+    return response
 
   def executeQuery(self, query):
     cursor = self.connection.cursor()
 
     try:
       response = cursor.execute(query).fetchall()
-      print(f'---- response - {response}')
 
       self.connection.commit()
-      print("Query executed successfully")
-
       return response
 
     except:
       raise
 
-
-
-
-manager = databaseManager()
-manager.basicSelectQuery('*', 'videos')
-# manager.dropTabletQuery('videos')
+  def __del__(self):
+    self.closeConnection()
