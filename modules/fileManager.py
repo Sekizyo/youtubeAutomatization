@@ -17,11 +17,27 @@ class FileManager():
     
     def updateVideoPath(self, videoID, path):
         self.dbManager.updateRecordByIDQuery('videos', 'localization', path, videoID)
-    
 
-    def __del__(self):
-        del self.dbManager
-        del self.fileMover
+    def checkForUnuploadedVideos(self):
+        result = self.dbManager.selectQuery('*', 'videos', 'uploaded = False')
+        return bool(result)
+
+    def checkForUnrenderedVideos(self):
+        result = self.dbManager.selectQuery('*', 'videos', 'rendered = False')
+        return bool(result)
+
+    def checkForReadyVideos(self):
+        result = self.dbManager.selectQuery('*', 'videos', 'uploaded = False AND rendered = True')
+        return bool(result)
+
+    def getBasicVideoInfo(self):
+        id_, title, description, videoLocation = self.dbManager.selectQuery('id, title, description, path','videos', 'uploaded = False LIMIT 1')
+        return id_, title, description, videoLocation
+
+    def getReadyVideo(self):
+        id_, title, description, videoLocation = self.getBasicVideoInfo()
+        self.updateVideoUploadStatus(id_, True)
+        return title, description, videoLocation
 
 class FileMover(FileManager):
     def __init__(self):

@@ -3,12 +3,13 @@ import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
-from module.youtube.uploader import youtubeUploader
 
-class youtube():
+from modules.youtube.uploader import YoutubeUploader
+
+class YoutubeManager():
     def __init__(self):
         self.youtube = self.auth()  
-        self.uploader = youtubeUploader(self.youtube)
+        self.uploader = YoutubeUploader(self.youtube)
 
     def auth(self):
         os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"

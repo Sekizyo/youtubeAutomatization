@@ -32,6 +32,7 @@ class databaseManager():
       title TEXT NOT NULL,
       description TEXT,
       uploaded BOOL NOT NULL,
+      rendered BOOL NOT NULL,
       path TEXT NOT NULL,
       soundcloudLink TEXT NOT NULL
       );
