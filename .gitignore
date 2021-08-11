@@ -3,5 +3,10 @@ bin
 include
 lib
 lib64
-modules/__pycache__
+__pycache__
 client_secret.json
+token_youtube_v3.pickle
+modules/storage/database.sqlite
+modules/storage/unused/
+modules/storage/uploaded/
+modules/storage/workInProgress/
