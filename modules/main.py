@@ -18,10 +18,10 @@ class Main():
         pass
 
     def upload(self):
-        self.youtubeManager.uploader.upload()
+        self.youtubeManager.upload()
 
     def run(self):
         # while self.running:
         #     self.download()
-        #     self.render()
-        self.upload()
+        self.render()
+        # self.upload()

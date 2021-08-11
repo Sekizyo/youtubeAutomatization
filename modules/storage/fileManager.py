@@ -40,7 +40,7 @@ class FileManager():
         response = self.getVideoBasicInfo()
         if response:
             id_, title, description, videoPath = response
-            # self.updateVideoUploadStatus(id_, True)
+            self.updateVideoUploadStatus(id_, True)
             return title, description, videoPath
         else:
             return None
