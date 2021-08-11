@@ -1,19 +1,33 @@
+import os
 import sqlite3
 from sqlite3 import Error
 
 class databaseManager():
   def __init__(self):
-    self.databasePath = '/media/joseph/HDD1/Py_projects/youtubeAutomatization/modules/storage/database.sqlite'
+    self.databasePath = 'modules/storage/database.sqlite'
+    self.initCheck()
     self.connection = self.createConnection()
+
+  def initCheck(self):
+    if not os.path.isfile(self.databasePath):
+      database = open(self.databasePath, 'x')
+      database.close()
+
+    self.connection = self.createConnection()
+
+    self.createAuthorTableQuery()
+    self.createVideoTableQuery()
+
+    self.closeConnection()
 
   def createConnection(self):
     connection = None
     try:
-        connection = sqlite3.connect(self.databasePath)
-        print("Connection to SQLite DB successful")
+      connection = sqlite3.connect(self.databasePath)
+      print("Connection to SQLite DB successful")
 
     except Error as e:
-        raise
+      raise
 
     return connection
 
@@ -34,6 +48,7 @@ class databaseManager():
       uploaded BOOL NOT NULL,
       rendered BOOL NOT NULL,
       path TEXT NOT NULL,
+      pathThumbnail TEXT NOT NULL,
       soundcloudLink TEXT NOT NULL
       );
       """
@@ -53,8 +68,8 @@ class databaseManager():
     return response
 
   def selectQuery(self, data, table, condition='1'):
-    query = f'SELECT {", ".join(data)} FROM {table} WHERE {condition};'
-    
+    query = f'SELECT {"".join(data)} FROM {table} WHERE {condition};'
+
     response = self.executeQuery(query)
     return response
 
@@ -93,7 +108,11 @@ class databaseManager():
       response = cursor.execute(query).fetchall()
 
       self.connection.commit()
-      return response
+
+      if response:
+        return response
+      else:
+        return None
 
     except:
       raise
