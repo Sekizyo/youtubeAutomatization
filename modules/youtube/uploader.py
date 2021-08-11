@@ -1,57 +1,71 @@
 import os
+import datetime
+from datetime import time
 
 from googleapiclient.http import MediaFileUpload
 
 class YoutubeUploader():
-    def __init__(self, youtube):
-        self.youtube = self.auth()
-
-        self.scopes = ["https://www.googleapis.com/auth/youtube.upload"]
-        self.api_service_name = "youtube"
-        self.api_version = "v3"
-        self.client_secrets_file = "client_secret.json"
+    def __init__(self, youtube, fileManager):
+        self.youtube = youtube
+        self.fileManager = fileManager
 
         self.categoryId = 10 # Music
         self.videoDir = '/media/joseph/HDD1/Py_projects/youtubeAutomatization/modules/storage/workInProgress'
 
-    def getTitle(self, videoTitle):
-        songName, authorName = videoTitle.split(' - ')
+    def createTitleDefault(self, videoTitle):
+        songName, authorName = str(videoTitle).split(' - ')
 
         return f'{songName} - {authorName} - beats to relax/study to'
 
-    def getDescription(self, creds):
+    def createDescriptionDefault(self, creds):
         return f"Thank you for listening, I hope you will have a good time\nCredits:\n–––––––––––––––––––––––––––––– \n{creds}\n ––––––––––––––––––––––––––––––"
 
-    def getVideoLocation(self, videoName):
-        return f'{self.videoDir}/{videoName}'
+    def getUploadTime(self):
+        format = "%d-%m-%Y"
 
-    def getVideoTitle(self):
-        result = os.system(f'ls {self.videoDir}/*.mp4 | head -1')
+        now = datetime.datetime.now()
+        now_date = now.strftime("%d-%m-%Y")
 
-    def upload(self, title, description, videoLocation):
-        videoTitle = self.getVideoTitle()
+        start_date = now.strptime(now_date, format)
+        start_date = start_date + datetime.timedelta(minutes=10)
 
-        title = self.generateTitle(videoTitle)
-        description = self.generateDescription()
-        videoLocation = self.getVideoLocation()
-        response = self.uploadRequest(title, description, videoLocation)
+        start_date = start_date.isoformat() + "Z"
+        return start_date
 
-    def uploadRequest(self, title, description, videoLocation):
-        request = self.youtube.videos().insert(
-            part="snippet,status",
-            body={
-            "snippet": {
-                "categoryId": self.categoryId,
-                "description": description,
-                "title": title
+    def upload(self):
+        video = self.fileManager.getReadyVideo()
+        if video:
+            videoTitle, videoDescription, videoPath = video
+
+            title = self.createTitleDefault(videoTitle)
+            description = self.createDescriptionDefault(videoDescription)
+
+            response = self.uploadRequest(title, description, videoPath)
+        else:
+            print('Upload failed, file not found')
+
+    def uploadRequest(self, title, description, videoPath):
+        request_body = {
+            'snippet': {
+                'categoryID': self.categoryId,
+                'title': title,
+                'description': description,
             },
-            "status": {
-                "privacyStatus": "private"
-            }
+            'status': {
+                'privacyStatus': 'private',
+                'publishAt': self.getUploadTime(),
+                'selfDeclaredMadeForKids': False, 
             },
-            
-            media_body=MediaFileUpload()
-        )
-        response = request.execute()
-        print(response)
-        return response
+            'notifySubscribers': False
+        }
+        mediaFile = MediaFileUpload(videoPath)
+
+
+        print('########## upload started ##########')
+        response_upload = self.youtube.videos().insert(
+            part='snippet,status',
+            body=request_body,
+            media_body=mediaFile
+        ).execute()
+
+        return response_upload
