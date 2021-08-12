@@ -1,24 +1,25 @@
 from modules.storage.fileManager import FileManager
-from modules.youtube.youtube import YoutubeManager
 from modules.soundcloud.downloader import DownloadManager
+from modules.render.renderManager import RenderManager
+from modules.youtube.youtube import YoutubeManager
 
 
 class Main():
     def __init__(self):
         self.running = True
         self.fileManager = FileManager()
-        self.youtubeManager = YoutubeManager(self.fileManager)
         self.downloadManager = DownloadManager(self.fileManager)
+        self.renderManager = RenderManager(self.fileManager)
+        self.youtubeManager = YoutubeManager(self.fileManager)
 
     def download(self):
-        # self.downloadManager.download()
-        pass
+        self.downloadManager.run()
         
     def render(self):
-        pass
-
+        self.renderManager.run()
+        
     def upload(self):
-        self.youtubeManager.upload()
+        self.youtubeManager.run()
 
     def run(self):
         # while self.running:

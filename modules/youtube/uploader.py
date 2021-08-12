@@ -26,7 +26,7 @@ class YoutubeUploader():
 
         return f'{songName} - {authorName} - beats to relax/study to'
 
-    def createDescriptionDefault(self, creds):
+    def createCredsDefault(self, creds):
         return f"Thank you for listening, I hope you will have a good time\nCredits:\n–––––––––––––––––––––––––––––– \n{creds}\n ––––––––––––––––––––––––––––––"
 
     def getUploadTime(self):
@@ -43,17 +43,17 @@ class YoutubeUploader():
 
     def upload(self):
         video = self.fileManager.getReadyVideo()
-        if video:
-            videoTitle, videoDescription, videoPath = video
+        try:
+            videoTitle, videoCreds, videoPath = video
 
             title = self.createTitleDefault(videoTitle)
-            description = self.createDescriptionDefault(videoDescription)
+            description = self.createCredsDefault(videoCreds)
 
             response = self.uploadRequest(title, description, videoPath)
-        else:
-            print('Upload failed, file not found')
-
-    def formatResponse(self, response):
+        except:
+            raise
+        
+    def formatResponse(self, response): #TODO add response 
         return response
 
     def uploadRequest(self, title, description, videoPath):

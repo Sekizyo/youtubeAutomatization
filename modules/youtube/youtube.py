@@ -17,5 +17,6 @@ class YoutubeManager():
         service = Create_Service(self.client_secrets_file, self.api_service_name, self.api_version, self.scopes)
         return service
 
-    def upload(self):
-        self.youtube.upload()
+    def run(self):
+        while self.fileManager.getVideoUnuploaded:
+            self.uploader.upload()
