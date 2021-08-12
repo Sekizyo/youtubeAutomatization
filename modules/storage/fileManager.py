@@ -35,8 +35,9 @@ class FileManager():
             self.updateAudioRenderStatusByID(audioID, True)
             self.updateThumbnailRenderStatusByID(thumbnailID, True)
 
+            title = audio[1]
 
-            self.dbManager.insertIntoQuery('video', 'audioID, thumbnailID, path', f'{audioID}, {thumbnailID}, {path}')
+            self.dbManager.insertIntoQuery('video', 'audioID, thumbnailID, title, path', f'{audioID}, {thumbnailID}, {title}, {path}')
         except:
             raise
 
@@ -60,8 +61,12 @@ class FileManager():
         response = self.dbManager.selectLimit1Query('*', 'thumbnail', 'rendered == false')
         return response
         
+    def getVideoUnrendered(self):
+        response = self.dbManager.selectLimit1Query('*', 'video', 'rendered == false AND uploaded == false')
+        return response
+
     def getVideoUnuploaded(self):
-        response = self.dbManager.selectLimit1Query('*', 'video', 'uploaded == false')
+        response = self.dbManager.selectLimit1Query('*', 'video', 'rendered == true AND uploaded == false')
         return response
 
     def getVideoReady(self):
@@ -85,6 +90,9 @@ class FileManager():
 
     def updateThumbnailRenderStatusByID(self, thumbnailID, status):
         self.dbManager.updateRecordByIDQuery('thumbnail', 'rendered', str(status).lower(), thumbnailID)
+
+    def updateVideoRenderStatusByID(self, videoID, status):
+        self.dbManager.updateRecordByIDQuery('video', 'rendered', str(status).lower(), videoID)
 
     def updateVideoUploadStatusByID(self, videoID, status):
         self.dbManager.updateRecordByIDQuery('video', 'uploaded', str(status).lower(), videoID)

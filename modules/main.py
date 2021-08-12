@@ -25,4 +25,4 @@ class Main():
         # while self.running:
         #     self.download()
         self.render()
-        # self.upload()
+        self.upload()

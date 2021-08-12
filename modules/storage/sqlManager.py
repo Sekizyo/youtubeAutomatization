@@ -70,6 +70,8 @@ class databaseManager():
       ID INTEGER PRIMARY KEY AUTOINCREMENT,
       audioID INTEGER NOT NULL,
       thumbnailID INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      rendered BOOL NOT NULL DEFAULT false,
       uploaded BOOL NOT NULL DEFAULT false,
       path TEXT NOT NULL
       );
