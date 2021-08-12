@@ -18,5 +18,10 @@ class YoutubeManager():
         return service
 
     def run(self):
-        while self.fileManager.getVideoUnuploaded:
+        running = self.fileManager.getVideoUnuploaded()
+        while running: 
             self.uploader.upload()
+
+        if not running:
+            self.fileManager.createVideo()
+            self.run()
