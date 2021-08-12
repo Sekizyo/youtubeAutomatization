@@ -15,7 +15,8 @@ class databaseManager():
 
     self.connection = self.createConnection()
 
-    self.createAuthorTableQuery()
+    self.createAudioTableQuery()
+    self.createThumbnailTableQuery()
     self.createVideoTableQuery()
 
     self.closeConnection()
@@ -39,28 +40,38 @@ class databaseManager():
     except Error as e:
       raise
 
-  def createVideoTableQuery(self):
-    query = f"""CREATE TABLE IF NOT EXISTS videos(
+  def createAudioTableQuery(self):
+    query = f"""CREATE TABLE IF NOT EXISTS audio(
       ID INTEGER PRIMARY KEY AUTOINCREMENT,
-      authorID INTEGER,
       title TEXT NOT NULL,
-      description TEXT,
-      uploaded BOOL NOT NULL,
-      rendered BOOL NOT NULL,
-      path TEXT NOT NULL,
-      pathThumbnail TEXT NOT NULL,
-      soundcloudLink TEXT NOT NULL
+      creds TEXT NOT NULL,
+      rendered BOOL NOT NULL DEFAULT false,
+      path TEXT NOT NULL
       );
       """
-      
+
     response = self.executeQuery(query)
     return response
 
-  def createAuthorTableQuery(self):
-    query = f"""CREATE TABLE IF NOT EXISTS author(
+  def createThumbnailTableQuery(self):
+    query = f"""CREATE TABLE IF NOT EXISTS thumbnail(
       ID INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      soundcloudLink TEXT NOT NULL
+      creds TEXT NOT NULL,
+      rendered BOOL NOT NULL DEFAULT false,
+      path TEXT NOT NULL
+      );
+      """
+    
+    response = self.executeQuery(query)
+    return response
+
+  def createVideoTableQuery(self):
+    query = f"""CREATE TABLE IF NOT EXISTS video(
+      ID INTEGER PRIMARY KEY AUTOINCREMENT,
+      audioID INTEGER NOT NULL,
+      thumbnailID INTEGER NOT NULL,
+      uploaded BOOL NOT NULL DEFAULT false,
+      path TEXT NOT NULL
       );
       """
 
@@ -71,6 +82,10 @@ class databaseManager():
     query = f'SELECT {"".join(data)} FROM {table} WHERE {condition};'
 
     response = self.executeQuery(query)
+    return response
+
+  def selectLimit1Query(self, data, table, condition='1'):
+    response = self.selectQuery(data, table, condition + ' LIMIT 1')
     return response
 
   def insertIntoQuery(self, tableName, columns, values):
