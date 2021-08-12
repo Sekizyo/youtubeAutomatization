@@ -11,48 +11,83 @@ class FileManager():
         self.unusedVideoDir = self.unusedDir + '/video'
         self.unusedImageDir = self.unusedDir + '/image'
 
+    def createAudio(self, title, creds, path):
+        try:
+            self.dbManager.insertIntoQuery('audio', 'title, creds, path', f'{title}, {creds}, {path}')
+        except:
+            raise
+
+    def createThumbnail(self, creds, path):
+        try:
+            self.dbManager.insertIntoQuery('thumbnail', 'creds, path', f'{creds}, {path}')
+        except:
+            raise
+
+    def createVideo(self):
+        audio = self.getAudioUnrendered()
+        thumbnail = self.getThumbnailUnrendered()
+        path = self.workInProgressDir
+
+        try:
+            audioID = audio[0]
+            thumbnailID = thumbnail[0]
+
+            self.updateAudioRenderStatusByID(audioID, True)
+            self.updateThumbnailRenderStatusByID(thumbnailID, True)
+
+
+            self.dbManager.insertIntoQuery('video', 'audioID, thumbnailID, path', f'{audioID}, {thumbnailID}, {path}')
+        except:
+            raise
+
+    def getAudioByID(self, videoID):
+        response = self.dbManager.selectQuery('*', 'audio', f'ID == {videoID}')
+        return response
+
+    def getThumbnailByID(self, videoID):
+        response = self.dbManager.selectQuery('*', 'thumbnail', f'ID == {videoID}')
+        return response
+
     def getVideoByID(self, videoID):
-        response = self.dbManager.selectQuery('*', 'videos', f'ID == {videoID}')
+        response = self.dbManager.selectQuery('*', 'video', f'ID == {videoID}')
         return response
 
-    def getUnuploadedVideo(self):
-        response = self.dbManager.selectQuery('*', 'videos', 'uploaded = False AND rendered = True LIMIT 1')
+    def getAudioUnrendered(self):
+        response = self.dbManager.selectLimit1Query('*', 'audio', 'rendered == false')
         return response
 
-    def getUnrenderedVideo(self):
-        response = self.dbManager.selectQuery('*', 'videos', 'rendered = False AND uploaded = False LIMIT 1')
+    def getThumbnailUnrendered(self):
+        response = self.dbManager.selectLimit1Query('*', 'thumbnail', 'rendered == false')
+        return response
+        
+    def getVideoUnuploaded(self):
+        response = self.dbManager.selectLimit1Query('*', 'video', 'uploaded == false')
         return response
 
-    def getVideoBasicInfo(self):
-        response = self.getUnuploadedVideo()
+    def getVideoReady(self):
+        response = self.getVideoUnuploaded()
         if response:
             formatedResponse = response[0]
+
             id_ = formatedResponse[0]
-            title = formatedResponse[2]
-            description = formatedResponse[3]
-            videoPath = formatedResponse[6]
+            title = formatedResponse[1]
+            description = formatedResponse[2]
+            videoPath = formatedResponse[3]
 
-            return id_, title, description, videoPath
-        else:
-            return None
+            self.updateVideoUploadStatusByID(id_, True)
 
-    def getReadyVideo(self):
-        response = self.getVideoBasicInfo()
-        if response:
-            id_, title, description, videoPath = response
-            self.updateVideoUploadStatus(id_, True)
             return title, description, videoPath
         else:
             return None
 
-    def updateVideoUploadStatus(self, videoID, status):
-        self.dbManager.updateRecordByIDQuery('videos', 'uploaded', status, videoID)
+    def updateAudioRenderStatusByID(self, audioID, status):
+        self.dbManager.updateRecordByIDQuery('audio', 'rendered', str(status).lower(), audioID)
 
-    def updateVideoRenderStatus(self, videoID, status):
-        self.dbManager.updateRecordByIDQuery('videos', 'rendered', status, videoID)
-    
-    def updateVideoPath(self, videoID, path):
-        self.dbManager.updateRecordByIDQuery('videos', 'localization', path, videoID)
+    def updateThumbnailRenderStatusByID(self, thumbnailID, status):
+        self.dbManager.updateRecordByIDQuery('thumbnail', 'rendered', str(status).lower(), thumbnailID)
+
+    def updateVideoUploadStatusByID(self, videoID, status):
+        self.dbManager.updateRecordByIDQuery('video', 'uploaded', str(status).lower(), videoID)
 
     def moveFileToUnused(self, source, video=True):
         if video:
