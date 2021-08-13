@@ -16,7 +16,7 @@ class databaseManager():
     self.connection = self.createConnection()
 
     self.createAudioTableQuery()
-    self.createThumbnailTableQuery()
+    self.createImageTableQuery()
     self.createVideoTableQuery()
 
     self.closeConnection()
@@ -46,19 +46,20 @@ class databaseManager():
       title TEXT NOT NULL,
       creds TEXT NOT NULL,
       rendered BOOL NOT NULL DEFAULT false,
-      path TEXT NOT NULL
+      UNIQUE(title)
       );
       """
 
     response = self.executeQuery(query)
     return response
 
-  def createThumbnailTableQuery(self):
-    query = f"""CREATE TABLE IF NOT EXISTS thumbnail(
+  def createImageTableQuery(self):
+    query = f"""CREATE TABLE IF NOT EXISTS image(
       ID INTEGER PRIMARY KEY AUTOINCREMENT,
+      filename TEXT NOT NULL,
       creds TEXT NOT NULL,
       rendered BOOL NOT NULL DEFAULT false,
-      path TEXT NOT NULL
+      UNIQUE(filename)
       );
       """
     
@@ -73,7 +74,7 @@ class databaseManager():
       title TEXT NOT NULL,
       rendered BOOL NOT NULL DEFAULT false,
       uploaded BOOL NOT NULL DEFAULT false,
-      path TEXT NOT NULL
+      UNIQUE(title)
       );
       """
 
@@ -91,8 +92,8 @@ class databaseManager():
     return response
 
   def insertIntoQuery(self, tableName, columns, values):
-    query = f'INSERT INTO {tableName} ({", ".join(columns)}) VALUES ({", ".join(values)});'
-    
+    query = f'INSERT INTO {tableName} ({columns}) VALUES ({values});'
+    print(f'---- query - {query}')
     response = self.executeQuery(query)
     return response
 
@@ -128,8 +129,6 @@ class databaseManager():
 
       if response:
         return response
-      else:
-        return None
 
     except:
       raise
