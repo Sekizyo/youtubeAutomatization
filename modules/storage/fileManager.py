@@ -5,11 +5,10 @@ from modules.storage.sqlManager import databaseManager
 class FileManager():
     def __init__(self):
         self.dbManager = databaseManager()
-        self.unusedDir = '/modules/storage/unused'
-        self.workInProgressDir = '/modules/storage/workInProgress'
-        self.uploadedDir = '/modules/storage/uploaded'
-        self.unusedVideoDir = self.unusedDir + '/video'
-        self.unusedImageDir = self.unusedDir + '/image'
+
+        self.audioDir = 'modules/storage/audio'
+        self.imageDir = 'modules/storage/image'
+        self.videoDir = 'modules/storage/video'
 
     def createAudio(self, title, creds, path):
         try:
@@ -17,16 +16,16 @@ class FileManager():
         except:
             raise
 
-    def createThumbnail(self, creds, path):
+    def createThumbnail(self, filename, creds):
         try:
-            self.dbManager.insertIntoQuery('thumbnail', 'creds, path', f'{creds}, {path}')
+            self.dbManager.insertIntoQuery('image', 'filename, creds', f"{filename}, {creds}")
         except:
             raise
 
     def createVideo(self):
         audio = self.getAudioUnrendered()
         thumbnail = self.getThumbnailUnrendered()
-        path = self.workInProgressDir
+        path = self.videoDir
 
         try:
             audioID = audio[0]
@@ -46,7 +45,7 @@ class FileManager():
         return response
 
     def getThumbnailByID(self, videoID):
-        response = self.dbManager.selectQuery('*', 'thumbnail', f'ID == {videoID}')
+        response = self.dbManager.selectQuery('*', 'image', f'ID == {videoID}')
         return response
 
     def getVideoByID(self, videoID):
@@ -58,7 +57,7 @@ class FileManager():
         return response
 
     def getThumbnailUnrendered(self):
-        response = self.dbManager.selectLimit1Query('*', 'thumbnail', 'rendered == false')
+        response = self.dbManager.selectLimit1Query('*', 'image', 'rendered == false')
         return response
         
     def getVideoUnrendered(self):
@@ -89,25 +88,13 @@ class FileManager():
         self.dbManager.updateRecordByIDQuery('audio', 'rendered', str(status).lower(), audioID)
 
     def updateThumbnailRenderStatusByID(self, thumbnailID, status):
-        self.dbManager.updateRecordByIDQuery('thumbnail', 'rendered', str(status).lower(), thumbnailID)
+        self.dbManager.updateRecordByIDQuery('image', 'rendered', str(status).lower(), thumbnailID)
 
     def updateVideoRenderStatusByID(self, videoID, status):
         self.dbManager.updateRecordByIDQuery('video', 'rendered', str(status).lower(), videoID)
 
     def updateVideoUploadStatusByID(self, videoID, status):
         self.dbManager.updateRecordByIDQuery('video', 'uploaded', str(status).lower(), videoID)
-
-    def moveFileToUnused(self, source, video=True):
-        if video:
-            self.moveFile(source, self.unusedVideoDir)
-        else:
-            self.moveFile(source, self.unusedImageDir)
-    
-    def moveFileToWorking(self, source):
-        self.moveFile(source, self.workInProgressDir)
-
-    def moveFileToUploaded(self, source):
-        self.moveFile(source, self.uploadedDir)
 
     def moveFile(self, source, destination):
         if os.path.exists(source) and os.path.exists(destination):
@@ -127,6 +114,17 @@ class FileManager():
 
         except:
             pass
+
+    def createPhotoFromResponse(self, title, response):
+        filePath = f'{self.imageDir}/{title}.jpg'
+        self.createFile(filePath)
+
+        with open(filePath, 'wb') as file:
+            for block in response.iter_content(1024):
+                if not block:
+                    break
+
+                file.write(block)
 
     def checkIfFileExists(self, path):
         return os.path.isfile(path)

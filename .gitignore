@@ -7,6 +7,6 @@ __pycache__
 client_secret.json
 token_youtube_v3.pickle
 modules/storage/database.sqlite
-modules/storage/unused/
-modules/storage/uploaded/
-modules/storage/workInProgress/
+modules/storage/audio
+modules/storage/image
+modules/storage/video
