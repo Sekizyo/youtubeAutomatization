@@ -1,6 +1,6 @@
 
 
-class DownloadManager():
+class AudioDownloadManager():
     def __init__(self, fileManager):
         self.fileManager = fileManager
         self.downloader = Downloader()

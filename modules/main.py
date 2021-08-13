@@ -1,5 +1,6 @@
 from modules.storage.fileManager import FileManager
-from modules.soundcloud.downloader import DownloadManager
+from modules.soundcloud.downloader import AudioDownloadManager
+from modules.thumbnail.downloader import ThumbnailDownloadManager
 from modules.render.renderManager import RenderManager
 from modules.youtube.youtube import YoutubeManager
 
@@ -8,12 +9,15 @@ class Main():
     def __init__(self):
         self.running = True
         self.fileManager = FileManager()
-        self.downloadManager = DownloadManager(self.fileManager)
+
+        self.audioDownloadManager = AudioDownloadManager(self.fileManager)
+        self.thumbnailDownloadManager = ThumbnailDownloadManager(self.fileManager)
         self.renderManager = RenderManager(self.fileManager)
         self.youtubeManager = YoutubeManager(self.fileManager)
 
     def download(self):
-        self.downloadManager.run()
+        # self.audioDownloadManager.run()
+        self.thumbnailDownloadManager.run()
         
     def render(self):
         self.renderManager.run()
@@ -23,6 +27,6 @@ class Main():
 
     def run(self):
         # while self.running:
-        #     self.download()
-        self.render()
-        self.upload()
+        self.download()
+        # self.render()
+        # self.upload()
