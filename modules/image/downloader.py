@@ -9,7 +9,7 @@ class ImageDownloadManager():
         self.fileManager = fileManager
         self.client_secrets_file = 'modules/image/client_secret.json'
         self.accessKey = self.getClientSecret()
-        self.topics = ['6sMVjTLSkeQ']
+        self.topics = ['6sMVjTLSkeQ', 'rnSKDHwwYUk'] # Nature, Architecture
 
     def getClientSecret(self):
         with open(self.client_secrets_file, 'r') as json_file:
