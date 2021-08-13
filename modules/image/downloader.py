@@ -1,11 +1,13 @@
-import requests
 import json
 import random
 
-class ThumbnailDownloadManager():
+import requests
+
+
+class ImageDownloadManager():
     def __init__(self, fileManager):
         self.fileManager = fileManager
-        self.client_secrets_file = 'modules/thumbnail/client_secret.json'
+        self.client_secrets_file = 'modules/image/client_secret.json'
         self.accessKey = self.getClientSecret()
         self.topics = ['6sMVjTLSkeQ']
 
