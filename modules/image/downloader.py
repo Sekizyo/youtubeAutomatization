@@ -10,6 +10,7 @@ class ImageDownloadManager():
         self.client_secrets_file = 'modules/image/client_secret.json'
         self.accessKey = self.getClientSecret()
         self.topics = ['6sMVjTLSkeQ', 'rnSKDHwwYUk'] # Nature, Architecture
+        self.searchTerms = ['night', 'stars', 'toykio', 'lofi', 'calm', 'dark']
 
     def getClientSecret(self):
         with open(self.client_secrets_file, 'r') as json_file:
@@ -31,8 +32,9 @@ class ImageDownloadManager():
         self.fileManager.createThumbnail(f"'{photoID}'", f"'{photoCreds}'")
 
     def getMultipleRandomPhotos(self):
-        response = self.executeApiRequest('/photos/random', topicID=self.getRandomTopic(), count=30)
+        response = self.executeApiRequest('/photos/random', topicID=self.getRandomTopic(), count=30, searchTerm=self.getRandomSearchTerm())
         jsonData = self.getJsonFromResponse(response)
+
         for data in jsonData:
 
             photoID = self.getIdFromJson(data)
@@ -48,6 +50,10 @@ class ImageDownloadManager():
         id_ = random.randint(0, len(self.topics)-1)
         return self.topics[id_]
 
+    def getRandomSearchTerm(self):
+        id_ = random.randint(0, len(self.searchTerms)-1)
+        return self.searchTerms[id_]
+
     def getIdFromJson(self, jsonData):
         return jsonData['id']
 
@@ -60,16 +66,18 @@ class ImageDownloadManager():
     def getJsonFromResponse(self, response):
         return response.json()
 
-    def executeApiRequest(self, endpoint, topicID='', count=''):
+    def executeApiRequest(self, endpoint, topicID='', count='', searchTerm=''):
         link = 'https://api.unsplash.com'
         
         token = f'/?client_id={self.accessKey}'
         if topicID:
             token += f'&topics={topicID}'
         
+        if searchTerm:
+            token += f'&query={searchTerm}'
+
         if count:
             token += f'&count={count}'
-
 
         response = self.executeGetRequest(f'{link}{endpoint}{token}')
         return response
