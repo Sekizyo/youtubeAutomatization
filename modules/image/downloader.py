@@ -82,4 +82,5 @@ class ImageDownloadManager():
             raise   
 
     def run(self):
-        self.getMultipleRandomPhotos()
+        if not self.fileManager.getThumbnailUnrendered():
+            self.getMultipleRandomPhotos()

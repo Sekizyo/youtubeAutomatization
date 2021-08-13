@@ -28,8 +28,5 @@ class RenderManager():
             raise
         
     def run(self):
-        while self.fileManager.getVideoUnrendered(): 
+        if self.fileManager.getVideoUnrendered(): 
             self.render()
-
-        self.fileManager.createVideo()
-        self.run()
