@@ -44,6 +44,7 @@ class databaseManager():
     query = f"""CREATE TABLE IF NOT EXISTS audio(
       ID INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
+      authorName TEXT NOT NULL,
       creds TEXT NOT NULL,
       rendered BOOL NOT NULL DEFAULT false,
       UNIQUE(title)
@@ -66,7 +67,7 @@ class databaseManager():
     response = self.executeQuery(query)
     return response
 
-  def createVideoTableQuery(self):
+  def createVideoTableQuery(self): #TODO FOR NEXT SESSION create new way for uploader to get info from video, needs video needs new author column or query from audio author
     query = f"""CREATE TABLE IF NOT EXISTS video(
       ID INTEGER PRIMARY KEY AUTOINCREMENT,
       audioID INTEGER NOT NULL,
@@ -93,7 +94,7 @@ class databaseManager():
 
   def insertIntoQuery(self, tableName, columns, values):
     query = f'INSERT INTO {tableName} ({columns}) VALUES ({values});'
-    print(f'---- query - {query}')
+
     response = self.executeQuery(query)
     return response
 
@@ -104,7 +105,7 @@ class databaseManager():
     return response
 
   def updateRecordByIDQuery(self, tableName, column, value, ID):
-    response = self.updateRecordQuery(tableName, column, value, f'ID = {ID}')
+    response = self.updateRecordQuery(tableName, column, value, f'ID == {ID}')
     return response 
 
   def deleteFromTableQuery(self, tableName, condition):

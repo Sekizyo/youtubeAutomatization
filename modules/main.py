@@ -28,5 +28,5 @@ class Main():
     def run(self):
         # while self.running:
         self.download()
-        # self.render()
-        # self.upload()
+        self.render()
+        self.upload()

@@ -7,26 +7,31 @@ class RenderManager():
 
     def render(self):
         video = self.fileManager.getVideoUnrendered()
-        try:
+        if video:
+            try:
 
-            videoID = video[0]
-            audioID = video[1]
-            thumbnailID = video[2]
+                videoID = video[0][0]
+                audioID = video[0][1]
+                thumbnailID = video[0][2]
 
-            audio = self.fileManager.getAudioByID(audioID)
-            thumbnail = self.fileManager.getThumbnailByID(thumbnailID)
+                audio = self.fileManager.getAudioByID(audioID)[0]
+                thumbnail = self.fileManager.getThumbnailByID(thumbnailID)[0]
 
-            audioPath = audio[4]
-            thumbnailPath = thumbnail[3]
+                audioPath = f'{self.fileManager.audioDir}/{audio[1]}'
+                thumbnailPath = f'{self.fileManager.imageDir}/{thumbnail[1]}'
+                videoPath = f'{self.fileManager.videoDir}/{video[0][3]}'
 
-            videoPath = self.fileManager.updateVideoPath
+                os.system(f'bash modules/render/render {thumbnailPath}.jpg {audioPath}.mp3 {videoPath}.mp4')
 
-            os.system(f'bash render {thumbnailPath} {audioPath} {videoPath}')
+                self.fileManager.updateVideoRenderStatusByID(videoID, True)
 
-            self.fileManager.updateVideoRenderStatus(videoID)
-        except:
-            raise
-        
+            except:
+                raise
+        else:
+            return None
+            
     def run(self):
-        if self.fileManager.getVideoUnrendered(): 
-            self.render()
+        if not self.fileManager.getVideoUnrendered(): 
+            self.fileManager.createVideo()
+            
+        self.render()

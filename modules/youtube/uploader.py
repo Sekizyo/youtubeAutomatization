@@ -21,10 +21,8 @@ class YoutubeUploader():
         self.retriableStatusCodes = [500, 502, 503, 504]
         self.retriableExceptions = (httplib2.HttpLib2Error, IOError, http.client.NotConnected, http.client.IncompleteRead, http.client.ImproperConnectionState, http.client.CannotSendRequest, http.client.CannotSendHeader, http.client.ResponseNotReady, http.client.BadStatusLine)
 
-    def createTitleDefault(self, videoTitle):
-        songName, authorName = str(videoTitle).split(' - ')
-
-        return f'{songName} - {authorName} - beats to relax/study to'
+    def createTitleDefault(self, videoTile, videoAuthor):
+        return f'{videoTile} - {videoAuthor} - beats to relax/study to'
 
     def createCredsDefault(self, creds):
         return f"Thank you for listening, I hope you will have a good time\nCredits:\n–––––––––––––––––––––––––––––– \n{creds}\n ––––––––––––––––––––––––––––––"
@@ -42,7 +40,7 @@ class YoutubeUploader():
         return start_date
 
     def upload(self):
-        video = self.fileManager.getReadyVideo()
+        video = self.fileManager.getVideoReady()
         try:
             videoTitle, videoCreds, videoPath = video
 

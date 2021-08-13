@@ -25,18 +25,21 @@ class FileManager():
     def createVideo(self):
         audio = self.getAudioUnrendered()
         thumbnail = self.getThumbnailUnrendered()
-        path = self.videoDir
+        
+        if not audio and thumbnail:
+            print('image or audio not found')
+            return None
 
         try:
-            audioID = audio[0]
-            thumbnailID = thumbnail[0]
+            audioID = audio[0][0]
+            thumbnailID = thumbnail[0][0]
 
             self.updateAudioRenderStatusByID(audioID, True)
             self.updateThumbnailRenderStatusByID(thumbnailID, True)
 
-            title = audio[1]
+            title = f"'{audio[0][1]}'"
 
-            self.dbManager.insertIntoQuery('video', 'audioID, thumbnailID, title, path', f'{audioID}, {thumbnailID}, {title}, {path}')
+            self.dbManager.insertIntoQuery('video', 'audioID, thumbnailID, title', f'{audioID}, {thumbnailID}, {title}')
         except:
             raise
 
