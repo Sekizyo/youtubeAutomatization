@@ -30,6 +30,20 @@ class ImageDownloadManager():
 
         self.fileManager.createThumbnail(f"'{photoID}'", f"'{photoCreds}'")
 
+    def getMultipleRandomPhotos(self):
+        response = self.executeApiRequest('/photos/random', topicID=self.getRandomTopic(), count=30)
+        jsonData = self.getJsonFromResponse(response)
+        for data in jsonData:
+
+            photoID = self.getIdFromJson(data)
+            photoCreds = self.getCredsFromJson(data)
+            photoLink = self.getPhotoLinkFromJson(data)
+
+            photo = self.executeGetRequest(photoLink, True)
+            self.fileManager.createPhotoFromResponse(photoID, photo)
+
+            self.fileManager.createThumbnail(f"'{photoID}'", f"'{photoCreds}'")
+
     def getRandomTopic(self):
         id_ = random.randint(0, len(self.topics)-1)
         return self.topics[id_]
@@ -46,12 +60,16 @@ class ImageDownloadManager():
     def getJsonFromResponse(self, response):
         return response.json()
 
-    def executeApiRequest(self, endpoint, topicID=''):
+    def executeApiRequest(self, endpoint, topicID='', count=''):
         link = 'https://api.unsplash.com'
         
         token = f'/?client_id={self.accessKey}'
         if topicID:
             token += f'&topics={topicID}'
+        
+        if count:
+            token += f'&count={count}'
+
 
         response = self.executeGetRequest(f'{link}{endpoint}{token}')
         return response
@@ -64,4 +82,4 @@ class ImageDownloadManager():
             raise   
 
     def run(self):
-        self.getRandomPhoto()
+        self.getMultipleRandomPhotos()
