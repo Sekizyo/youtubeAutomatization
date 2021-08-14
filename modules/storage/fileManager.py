@@ -1,47 +1,51 @@
 import os
 
 from modules.storage.sqlManager import databaseManager
+from modules.storage.formater import Formater
 
 class FileManager():
     def __init__(self):
         self.dbManager = databaseManager()
+        self.formater = Formater()
 
         self.audioDir = 'modules/storage/audio'
         self.imageDir = 'modules/storage/image'
         self.videoDir = 'modules/storage/video'
 
-    def createAudio(self, title, creds, path):
-        try:
-            self.dbManager.insertIntoQuery('audio', 'title, creds, path', f'{title}, {creds}, {path}')
-        except:
-            raise
+    def createAudio(self, filename, title, authorName, creds):
+        self.dbManager.insertIntoQuery('audio', 'filename, title, authorName, creds, path', f'{filename}, {title}, {authorName}, {creds}')
 
     def createThumbnail(self, filename, creds):
-        try:
-            self.dbManager.insertIntoQuery('image', 'filename, creds', f"{filename}, {creds}")
-        except:
-            raise
+        self.dbManager.insertIntoQuery('image', 'filename, creds', f"{filename}, {creds}")
 
-    def createVideo(self):
-        audio = self.getAudioUnrendered()
-        thumbnail = self.getThumbnailUnrendered()
-        
-        if not audio and thumbnail:
-            print('image or audio not found')
-            return None
+    def prepCreateVideo(self):
+        audioID = self.getAudioIDUnrendered()
 
-        try:
-            audioID = audio[0][0]
-            thumbnailID = thumbnail[0][0]
+        thumbnailID = self.getThumbnailIDUnrendered()
+
+        if audioID and thumbnailID:
+            audio = self.getAudioByID(audioID)[0]
+            thumbnail = self.getThumbnailByID(thumbnailID)[0]
+
 
             self.updateAudioRenderStatusByID(audioID, True)
             self.updateThumbnailRenderStatusByID(thumbnailID, True)
 
-            title = f"'{audio[0][1]}'"
+            audioFilename = audio[1]
+            audioAuthor = audio[3]
+            videoTitle = audioFilename
 
-            self.dbManager.insertIntoQuery('video', 'audioID, thumbnailID, title', f'{audioID}, {thumbnailID}, {title}')
-        except:
-            raise
+            audioCreds = audio[4]
+            imageCreds = thumbnail[2]
+            videoDescription = f"'{audioCreds}, {imageCreds}'"
+
+            return videoTitle, videoDescription, audioID, thumbnailID
+        else:
+            return None
+
+    def createVideo(self):
+        videoTitle, videoDescription, audioID, thumbnailID = self.prepCreateVideo()
+        self.dbManager.insertIntoQuery('video', 'audioID, thumbnailID, title, description', f'{audioID}, {thumbnailID}, {videoTitle}, {videoDescription}')
 
     def getAudioByID(self, videoID):
         response = self.dbManager.selectQuery('*', 'audio', f'ID == {videoID}')
@@ -59,9 +63,17 @@ class FileManager():
         response = self.dbManager.selectLimit1Query('*', 'audio', 'rendered == false')
         return response
 
+    def getAudioIDUnrendered(self):
+        response = self.dbManager.selectLimit1Query('*', 'audio', 'rendered == false')
+        return response[0][0]
+
     def getThumbnailUnrendered(self):
         response = self.dbManager.selectLimit1Query('*', 'image', 'rendered == false')
         return response
+
+    def getThumbnailIDUnrendered(self):
+        response = self.dbManager.selectLimit1Query('*', 'image', 'rendered == false')
+        return response[0][0]
         
     def getVideoUnrendered(self):
         response = self.dbManager.selectLimit1Query('*', 'video', 'rendered == false AND uploaded == false')
@@ -72,14 +84,13 @@ class FileManager():
         return response
 
     def getVideoReady(self):
-        response = self.getVideoUnuploaded()
-        if response:
-            formatedResponse = response[0]
+        video = self.getVideoUnuploaded()[0]
+        if video:
 
-            id_ = formatedResponse[0]
-            title = formatedResponse[1]
-            description = formatedResponse[2]
-            videoPath = formatedResponse[3]
+            id_ = video[0]
+            title = video[3]
+            description = video[4]
+            videoPath = f'{self.videoDir}/{title}.mp4'
 
             self.updateVideoUploadStatusByID(id_, True)
 
@@ -100,15 +111,11 @@ class FileManager():
         self.dbManager.updateRecordByIDQuery('video', 'uploaded', str(status).lower(), videoID)
 
     def moveFile(self, source, destination):
-        if os.path.exists(source) and os.path.exists(destination):
-            try:
-                os.rename(source, destination)
-                return True
-
-            except:
-                raise
-        else:
-            return False
+        try:
+            os.rename(source, destination)
+            return True
+        except:
+            raise
 
     def createFile(self, path='modules/storage/'):
         try:
@@ -116,7 +123,7 @@ class FileManager():
             file.close()
 
         except:
-            pass
+            raise
 
     def createPhotoFromResponse(self, title, response):
         filePath = f'{self.imageDir}/{title}.jpg'
@@ -129,16 +136,13 @@ class FileManager():
 
                 file.write(block)
 
+        self.formater.run(filePath)
+
     def checkIfFileExists(self, path):
         return os.path.isfile(path)
 
     def deleteFile(self, source):
-        if os.path.exists(source):
-            try:
-                os.remove(source)
-                return True
-
-            except:
-                raise
-        else:
-            return False
+        try:
+            os.remove(source)
+        except:
+            raise
