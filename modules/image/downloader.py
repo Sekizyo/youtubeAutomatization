@@ -36,15 +36,16 @@ class ImageDownloadManager():
         jsonData = self.getJsonFromResponse(response)
 
         for data in jsonData:
-
             photoID = self.getIdFromJson(data)
             photoCreds = self.getCredsFromJson(data)
             photoLink = self.getPhotoLinkFromJson(data)
 
             photo = self.executeGetRequest(photoLink, True)
             self.fileManager.createPhotoFromResponse(photoID, photo)
+            self.saveImageToDB(photoID, photoCreds)
 
-            self.fileManager.createThumbnail(f"'{photoID}'", f"'{photoCreds}'")
+    def saveImageToDB(self, photoID, photoCreds):
+        self.fileManager.createThumbnail(f"'{photoID}'", f"'{photoCreds}'")
 
     def getRandomTopic(self):
         id_ = random.randint(0, len(self.topics)-1)
