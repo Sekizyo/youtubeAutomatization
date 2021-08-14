@@ -70,11 +70,11 @@ class YoutubeUploader():
         return insertRequest
 
     def getTitleTemplate(self, videoTile):
-        return f"'{videoTile} - beats to relax/study to'"
+        return f"{videoTile} - beats to relax/study to"
 
     def getCredsTemplate(self, videoCreds):
         audioCreds, imageCreds = videoCreds.split(', ')
-        return f"'Thank you for listening, I hope you will have a good time\nCredits:\n–––––––––––––––––––––––––––––– \nAudio:\n{audioCreds}\nImage:\n{imageCreds}\n ––––––––––––––––––––––––––––––'"
+        return f"Thank you for listening, I hope you will have a good time\nCredits:\n–––––––––––––––––––––––––––––– \nAudio:\n{audioCreds}\nImage:\n{imageCreds}\n ––––––––––––––––––––––––––––––"
 
     def resumable_upload(self, insertRequest):
         response = None
