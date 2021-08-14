@@ -43,11 +43,12 @@ class databaseManager():
   def createAudioTableQuery(self):
     query = f"""CREATE TABLE IF NOT EXISTS audio(
       ID INTEGER PRIMARY KEY AUTOINCREMENT,
+      filename TEXT NOT NULL,
       title TEXT NOT NULL,
       authorName TEXT NOT NULL,
       creds TEXT NOT NULL,
       rendered BOOL NOT NULL DEFAULT false,
-      UNIQUE(title)
+      UNIQUE(filename, title)
       );
       """
 
@@ -67,12 +68,13 @@ class databaseManager():
     response = self.executeQuery(query)
     return response
 
-  def createVideoTableQuery(self): #TODO FOR NEXT SESSION create new way for uploader to get info from video, needs video needs new author column or query from audio author
+  def createVideoTableQuery(self):
     query = f"""CREATE TABLE IF NOT EXISTS video(
       ID INTEGER PRIMARY KEY AUTOINCREMENT,
       audioID INTEGER NOT NULL,
       thumbnailID INTEGER NOT NULL,
       title TEXT NOT NULL,
+      description TEXT NOT NULL,
       rendered BOOL NOT NULL DEFAULT false,
       uploaded BOOL NOT NULL DEFAULT false,
       UNIQUE(title)
@@ -114,7 +116,7 @@ class databaseManager():
     response = self.executeQuery(query)
     return response
 
-  def dropTabletQuery(self, tableName):
+  def dropTableQuery(self, tableName):
     query = f'DROP TABLE {tableName};'
 
     response = self.executeQuery(query)
@@ -127,9 +129,7 @@ class databaseManager():
       response = cursor.execute(query).fetchall()
 
       self.connection.commit()
-
-      if response:
-        return response
+      return response
 
     except:
       raise

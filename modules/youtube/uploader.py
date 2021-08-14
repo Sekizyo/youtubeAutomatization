@@ -21,12 +21,17 @@ class YoutubeUploader():
         self.retriableStatusCodes = [500, 502, 503, 504]
         self.retriableExceptions = (httplib2.HttpLib2Error, IOError, http.client.NotConnected, http.client.IncompleteRead, http.client.ImproperConnectionState, http.client.CannotSendRequest, http.client.CannotSendHeader, http.client.ResponseNotReady, http.client.BadStatusLine)
 
-    def createTitleDefault(self, videoTile, videoAuthor):
-        return f'{videoTile} - {videoAuthor} - beats to relax/study to'
+    def upload(self):
+        try:
+            self.prepForUpload()
+        except:
+            raise
 
-    def createCredsDefault(self, creds):
-        return f"Thank you for listening, I hope you will have a good time\nCredits:\n–––––––––––––––––––––––––––––– \n{creds}\n ––––––––––––––––––––––––––––––"
-
+    def prepForUpload(self):
+        request = self.createRequest()
+        response = self.executeUploadRequest(request)
+        return response
+        
     def getUploadTime(self):
         format = "%d-%m-%Y"
 
@@ -39,27 +44,14 @@ class YoutubeUploader():
         start_date = start_date.isoformat() + "Z"
         return start_date
 
-    def upload(self):
-        video = self.fileManager.getVideoReady()
-        try:
-            videoTitle, videoCreds, videoPath = video
+    def createRequest(self):
+        videoTitle, videoCreds, videoPath = self.fileManager.getVideoReady()
 
-            title = self.createTitleDefault(videoTitle)
-            description = self.createCredsDefault(videoCreds)
-
-            response = self.uploadRequest(title, description, videoPath)
-        except:
-            raise
-        
-    def formatResponse(self, response): #TODO add response 
-        return response
-
-    def uploadRequest(self, title, description, videoPath):
         request_body = {
             'snippet': {
                 'categoryID': self.categoryId,
-                'title': title,
-                'description': description,
+                'title': self.getTitleTemplate(videoTitle),
+                'description': self.getCredsTemplate(videoCreds),
             },
             'status': {
                 'privacyStatus': 'private',
@@ -74,9 +66,15 @@ class YoutubeUploader():
             body=request_body,
             media_body=MediaFileUpload(videoPath, chunksize=-1, resumable=True)
         )
-        response = self.resumable_upload(insertRequest)
 
-        return self.formatResponse(response)
+        return insertRequest
+
+    def getTitleTemplate(self, videoTile):
+        return f"'{videoTile} - beats to relax/study to'"
+
+    def getCredsTemplate(self, videoCreds):
+        audioCreds, imageCreds = videoCreds.split(', ')
+        return f"'Thank you for listening, I hope you will have a good time\nCredits:\n–––––––––––––––––––––––––––––– \nAudio:\n{audioCreds}\nImage:\n{imageCreds}\n ––––––––––––––––––––––––––––––'"
 
     def resumable_upload(self, insertRequest):
         response = None
@@ -111,3 +109,10 @@ class YoutubeUploader():
                 sleep_seconds = random.random() * max_sleep
                 print ("Sleeping %f seconds and then retrying..." % sleep_seconds)
                 time.sleep(sleep_seconds)
+
+    def executeUploadRequest(self, request):
+        try:
+            response = self.resumable_upload(request)
+            return response
+        except:
+            raise
