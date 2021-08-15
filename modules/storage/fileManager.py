@@ -13,27 +13,27 @@ class FileManager():
         self.videoDir = 'modules/storage/video'
 
     def createAudio(self, filename, title, authorName, creds):
-        self.dbManager.insertIntoQuery('audio', 'filename, title, authorName, creds, path', f'{filename}, {title}, {authorName}, {creds}')
+        response = self.dbManager.insertIntoQuery('audio', 'filename, title, authorName, creds', f"{filename}, {title}, {authorName}, {creds}")
+        return response
 
     def createThumbnail(self, filename, creds):
-        self.dbManager.insertIntoQuery('image', 'filename, creds', f"{filename}, {creds}")
-
+        response = self.dbManager.insertIntoQuery('image', 'filename, creds', f"{filename}, {creds}")
+        return response
+        
     def prepCreateVideo(self):
         audioID = self.getAudioIDUnrendered()
-
         thumbnailID = self.getThumbnailIDUnrendered()
 
         if audioID and thumbnailID:
             audio = self.getAudioByID(audioID)[0]
             thumbnail = self.getThumbnailByID(thumbnailID)[0]
 
-
             self.updateAudioRenderStatusByID(audioID, True)
             self.updateThumbnailRenderStatusByID(thumbnailID, True)
 
             audioFilename = audio[1]
             audioAuthor = audio[3]
-            videoTitle = audioFilename
+            videoTitle = f"'{audioFilename}'"
 
             audioCreds = audio[4]
             imageCreds = thumbnail[2]
@@ -110,6 +110,10 @@ class FileManager():
     def updateVideoUploadStatusByID(self, videoID, status):
         self.dbManager.updateRecordByIDQuery('video', 'uploaded', str(status).lower(), videoID)
 
+    def checkIfAudioExists(self, title):
+        response = self.dbManager.selectLimit1Query('*', 'audio', f'{title}')
+        return bool(response)
+
     def moveFile(self, source, destination):
         try:
             os.rename(source, destination)
@@ -123,21 +127,30 @@ class FileManager():
             file.close()
 
         except:
-            raise
+            pass
+
+    def createAudioFromResponse(self, title, response):
+        filePath = f"{self.audioDir}/{title}.mp3"
+        self.createFileFromBytes(response, filePath)
 
     def createPhotoFromResponse(self, title, response):
         filePath = f'{self.imageDir}/{title}.jpg'
-        self.createFile(filePath)
-
-        with open(filePath, 'wb') as file:
-            for block in response.iter_content(1024):
-                if not block:
-                    break
-
-                file.write(block)
-
+        self.createFileFromBytes(response, filePath)
         self.formater.run(filePath)
 
+    def createFileFromBytes(self, bytes, filePath):
+        if not self.checkIfFileExists(filePath):
+            self.createFile(filePath)
+            try:
+                with open(filePath, 'wb') as file:
+                    for block in bytes.iter_content(1024):
+                        if not block:
+                            break
+
+                        file.write(block)
+            except:
+                raise
+            
     def checkIfFileExists(self, path):
         return os.path.isfile(path)
 

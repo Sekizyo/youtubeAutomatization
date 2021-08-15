@@ -16,7 +16,7 @@ class Main():
         self.youtubeManager = YoutubeManager(self.fileManager)
 
     def download(self):
-        # self.audioDownloadManager.run()
+        self.audioDownloadManager.run()
         self.imageDownloadManager.run()
         
     def render(self):
@@ -26,7 +26,7 @@ class Main():
         self.youtubeManager.run()
 
     def run(self):
-        # while self.running:
-        self.download()
-        self.render()
-        self.upload()
+        while self.running:
+            self.download()
+            self.render()
+            # self.upload()
