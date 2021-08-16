@@ -7,14 +7,16 @@ from datetime import time
 import httplib2
 from apiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
+from modules.keywords.keywordManager import KeywordManager
 
 
 class YoutubeUploader():
     def __init__(self, youtube, fileManager):
         self.youtube = youtube
         self.fileManager = fileManager
+        self.keywordManager = KeywordManager()
 
-        self.categoryId = 10 # Music
+        self.categoryId = '3' # Music
         self.videoDir = '/media/joseph/HDD1/Py_projects/youtubeAutomatization/modules/storage/workInProgress'
 
         self.maxRetries = 10
@@ -52,6 +54,7 @@ class YoutubeUploader():
                 'categoryID': self.categoryId,
                 'title': self.getTitleTemplate(videoTitle),
                 'description': self.getCredsTemplate(videoCreds),
+                'tags': ', '.join(self.keywordManager.getRandomTopicList(10)),
             },
             'status': {
                 'privacyStatus': 'private',

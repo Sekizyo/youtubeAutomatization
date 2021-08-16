@@ -1,15 +1,16 @@
 import requests
 import random
 from bs4 import BeautifulSoup
+from modules.keywords.keywordManager import KeywordManager
 
 class AudioDownloadManager():
     def __init__(self, fileManager):
         self.fileManager = fileManager
-        self.categories = ['ambient', 'relaxing', 'piano', 'beats', 'calm', 'lofi']
+        self.keywordManager = KeywordManager()
         self.mainLink = 'https://www.chosic.com/free-music/'
 
     def getSongList(self):
-        category = self.getRandomCategory()
+        category = self.keywordManager.getRandomCategory()
         request = f'{self.mainLink}/{category}/'
         response = self.executeGetRequest(request)
 
@@ -25,7 +26,7 @@ class AudioDownloadManager():
 
             creds, downloadUrl = self.proceedIntoUrl(credlink)
             self.saveSongToDB(author, title, creds, downloadUrl)
-            break
+            
 
     def saveSongToDB(self, author, title, creds, downloadUrl):
         author = self.formatString(author)
@@ -37,7 +38,7 @@ class AudioDownloadManager():
 
 
         response = self.executeGetRequest(downloadUrl, True)
-        if not self.fileManager.checkIfAudioExists(filename):
+        if not self.fileManager.checkIfAudioExists(f"'{filename}'"):
             self.fileManager.createAudio(filename, title, author, creds)
             self.fileManager.createAudioFromResponse(filename, response)
 
@@ -60,10 +61,6 @@ class AudioDownloadManager():
         if doubleString:
             string = f'"{string}"'
         return string
-
-    def getRandomCategory(self):
-        index = random.randint(0, len(self.categories)-1)
-        return self.categories[index]
 
     def executeGetRequest(self, link, stream=False):
         try:
