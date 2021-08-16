@@ -132,7 +132,7 @@ class databaseManager():
       return response
 
     except:
-      raise
+      return False
 
   def __del__(self):
     self.closeConnection()

@@ -44,9 +44,12 @@ class FileManager():
             return None
 
     def createVideo(self):
-        videoTitle, videoDescription, audioID, thumbnailID = self.prepCreateVideo()
-        self.dbManager.insertIntoQuery('video', 'audioID, thumbnailID, title, description', f'{audioID}, {thumbnailID}, {videoTitle}, {videoDescription}')
-
+        try:
+            videoTitle, videoDescription, audioID, thumbnailID = self.prepCreateVideo()
+            self.dbManager.insertIntoQuery('video', 'audioID, thumbnailID, title, description', f'{audioID}, {thumbnailID}, {videoTitle}, {videoDescription}')
+        except:
+            pass
+        
     def getAudioByID(self, videoID):
         response = self.dbManager.selectQuery('*', 'audio', f'ID == {videoID}')
         return response
@@ -65,7 +68,10 @@ class FileManager():
 
     def getAudioIDUnrendered(self):
         response = self.dbManager.selectLimit1Query('*', 'audio', 'rendered == false')
-        return response[0][0]
+        if response:
+            return response[0][0]
+        else:
+            return None
 
     def getThumbnailUnrendered(self):
         response = self.dbManager.selectLimit1Query('*', 'image', 'rendered == false')
