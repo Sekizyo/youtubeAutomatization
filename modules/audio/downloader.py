@@ -10,6 +10,7 @@ class AudioDownloadManager():
         self.mainLink = 'https://www.chosic.com/free-music/'
 
     def getSongList(self):
+        print('-----------', 'Started audio download')
         for i in range(1, 9):
             category = self.keywordManager.getRandomCategory()
             request = f'{self.mainLink}/{category}/page/{i}/'

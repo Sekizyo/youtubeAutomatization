@@ -32,6 +32,7 @@ class ImageDownloadManager():
         self.fileManager.createThumbnail(f"'{photoID}'", f"'{photoCreds}'")
 
     def getMultipleRandomPhotos(self):
+        print('-----------', 'Started photo download')
         response = self.executeApiRequest('/photos/random', topicID=self.getRandomTopic(), count=30, searchTerm=self.getRandomSearchTerm())
         jsonData = self.getJsonFromResponse(response)
 

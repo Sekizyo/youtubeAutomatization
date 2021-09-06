@@ -13,10 +13,10 @@ class Main():
         self.audioDownloadManager = AudioDownloadManager(self.fileManager)
         self.imageDownloadManager = ImageDownloadManager(self.fileManager)
         self.renderManager = RenderManager(self.fileManager)
-        self.youtubeManager = YoutubeManager(self.fileManager)
+        # self.youtubeManager = YoutubeManager(self.fileManager)
 
     def download(self):
-        self.audioDownloadManager.run()
+        # self.audioDownloadManager.run()
         self.imageDownloadManager.run()
         
     def render(self):
@@ -28,5 +28,6 @@ class Main():
     def run(self):
         while self.running:
             self.download()
-            self.render()
+            # self.render()
             # self.upload()
+            # self.fileManager.deleteUploadedFiles()
