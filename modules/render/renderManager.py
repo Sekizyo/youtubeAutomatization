@@ -1,4 +1,4 @@
-import os
+from moviepy.editor import AudioFileClip, ImageClip
 
 
 class RenderManager():
@@ -17,12 +17,14 @@ class RenderManager():
                 audio = self.fileManager.getAudioByID(audioID)[0]
                 thumbnail = self.fileManager.getThumbnailByID(thumbnailID)[0]
 
-                videoPath = f"'{self.fileManager.videoDir}/{video[3]}'"
-                formated = f'"{audio[1]}"'
-                audioPath = f"'{self.fileManager.audioDir}/{formated}'"
-                thumbnailPath = f"'{self.fileManager.imageDir}/{thumbnail[1]}'"
+                videoPath = f'{self.fileManager.videoDir}/{video[3]}.mp4'
+                audioPath = f"{self.fileManager.audioDir}/'{audio[1]}'.mp3"
+                thumbnailPath = f'{self.fileManager.imageDir}/{thumbnail[1]}.jpg'
 
-                os.system(f'bash modules/render/render {thumbnailPath}.jpg {audioPath}.mp3 {videoPath}.mp4')
+                audio = AudioFileClip(audioPath)
+                clip = ImageClip(thumbnailPath).set_duration(audio.duration)
+                clip = clip.set_audio(audio)
+                clip.write_videofile(videoPath, fps=12)
 
                 self.fileManager.updateVideoRenderStatusByID(videoID, True)
 
