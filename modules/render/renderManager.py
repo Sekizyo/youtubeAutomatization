@@ -18,7 +18,7 @@ class RenderManager():
                 thumbnail = self.fileManager.getThumbnailByID(thumbnailID)[0]
 
                 videoPath = f'{self.fileManager.videoDir}/{video[3]}.mp4'
-                audioPath = f"{self.fileManager.audioDir}/'{audio[1]}'.mp3"
+                audioPath = f'{self.fileManager.audioDir}/{audio[1]}.mp3'
                 thumbnailPath = f'{self.fileManager.imageDir}/{thumbnail[1]}.jpg'
 
                 audio = AudioFileClip(audioPath)

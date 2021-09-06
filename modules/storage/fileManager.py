@@ -66,6 +66,10 @@ class FileManager():
         response = self.dbManager.selectLimit1Query('*', 'audio', 'rendered == false')
         return response
 
+    def getAudiosRendered(self):
+        response = self.dbManager.selectQuery('*', 'audio', 'rendered == true')
+        return response
+
     def getAudioIDUnrendered(self):
         response = self.dbManager.selectLimit1Query('*', 'audio', 'rendered == false')
         if response:
@@ -75,6 +79,10 @@ class FileManager():
 
     def getThumbnailUnrendered(self):
         response = self.dbManager.selectLimit1Query('*', 'image', 'rendered == false')
+        return response
+
+    def getThumbnailsRendered(self):
+        response = self.dbManager.selectQuery('*', 'image', 'rendered == true')
         return response
 
     def getThumbnailIDUnrendered(self):
@@ -87,6 +95,10 @@ class FileManager():
 
     def getVideoUnuploaded(self):
         response = self.dbManager.selectLimit1Query('*', 'video', 'rendered == true AND uploaded == false')
+        return response
+
+    def getVideosUploaded(self):
+        response = self.dbManager.selectQuery('*', 'video', 'rendered == true AND uploaded == true')
         return response
 
     def getVideoReady(self):
@@ -136,7 +148,7 @@ class FileManager():
             pass
 
     def createAudioFromResponse(self, title, response):
-        filePath = f"{self.audioDir}/{title}.mp3"
+        filePath = f'{self.audioDir}/{title}.mp3'
         self.createFileFromBytes(response, filePath)
 
     def createPhotoFromResponse(self, title, response):
@@ -165,3 +177,28 @@ class FileManager():
             os.remove(source)
         except:
             raise
+    
+    def deleteUploadedFiles(self):
+        audios = self.getAudiosRendered()
+        images = self.getThumbnailsRendered()
+        videos = self.getVideosUploaded()
+        for audio in audios:
+            try:
+                if audio:
+                    self.deleteFile(f"{self.audioDir}/'{audio[1]}'.mp3")
+            except:
+                pass
+
+        for image in images:
+            try:
+                if image:
+                    self.deleteFile(f'{self.imageDir}/{image[1]}.jpg')
+            except:
+                pass
+
+        for video in videos:
+            try:
+                if video:
+                    self.deleteFile(f'{self.videoDir}/{video[3]}.mp4')   
+            except:
+                pass
